@@ -1,0 +1,25 @@
+name: data-pipeline-workflow
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo content
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+      - name: Install dependencies
+        run: pip install -r "AQI Predictor/requirements.txt"
+      - name: Run data pipeline
+        env:
+          HOPSWORK_KEY: ${{ secrets.HOPSWORK_KEY }}
+        working-directory: "AQI Predictor/Feature_Pipeline"
+        run: python data_pipeline.py
