@@ -2,3 +2,5 @@
 .cache.sqlite
 __pycache__/
 .ipynb_checkpoints/
+Registered_Models/
+catboost_info/
