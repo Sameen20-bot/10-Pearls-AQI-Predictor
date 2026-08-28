@@ -6,6 +6,8 @@ import numpy as np
 import hopsworks
 from pathlib import Path
 from dotenv import load_dotenv
+import time
+
 
 LATITUDE = 24.8608
 LONGITUDE = 67.0104
@@ -308,16 +310,18 @@ def push_to_hopsworks(project, daily1, daily2, daily3):
     }
 
     for feature_name, data in DATASET_INSERT.items():
-        fg = fs.get_feature_group(
-        name = feature_name,
-        version = 1,
-        )
-
-        CHECK_COLS = ["us_aqi", "previous_day_aqi",
-                  "rolled_mean_aqi_72hr", "rolled_std_aqi_72hr"]
-        
+        fg = fs.get_feature_group(name=feature_name, version=1)
         to_insert = data.reset_index()
-        to_insert = to_insert.dropna(subset=CHECK_COLS)
-        fg.insert(to_insert, wait=False)
 
-        print(f"{feature_name}: {len(to_insert)} rows inserted successfully")
+        for attempt in range(3):
+            try:
+                fg.insert(to_insert, wait=False)
+                print(f"{feature_name}: {len(to_insert)} rows inserted successfully")
+                break
+            except Exception as e:
+                print(f"{feature_name}: Tried {attempt + 1} failed - {e}")
+                if attempt == 2:
+                    raise
+                time.sleep(20)
+
+    time.sleep(10)
