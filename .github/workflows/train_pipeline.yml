@@ -1,0 +1,25 @@
+name: train-pipeline-workflow
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2 * * *"
+
+jobs:
+  run-training-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo content
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+      - name: Install dependencies
+        run: pip install -r "AQI Predictor/requirements-train.txt"
+      - name: Run training pipeline
+        env:
+          HOPSWORK_KEY: ${{ secrets.HOPSWORK_KEY }}
+        working-directory: "AQI Predictor/Training_Pipeline"
+        run: python train_models.py
