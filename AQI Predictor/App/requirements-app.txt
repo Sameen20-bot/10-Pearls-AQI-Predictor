@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+hopsworks[python]
+xgboost
+catboost
+scikit-learn=1.7.2
+joblib
+pandas
+python-dotenv

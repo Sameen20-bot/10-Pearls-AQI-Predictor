@@ -1,12 +1,16 @@
 import os
 import json
 import joblib
+import time
 import pandas as pd
 import hopsworks
 from pathlib import Path
 from dotenv import load_dotenv
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
+import datetime as dt
+
+DATA_CACHE = {}
 
 #Step1: Hopsworks connection function
 def connect_hopsworks():
@@ -76,3 +80,113 @@ def load_blend_model(project, horizon):
     }
 
     return models, feature_names
+
+# Step3: Reading data from feature group
+def read_feature_group(project, fg_name):
+    fs = project.get_feature_store()
+    fg = fs.get_feature_group(name=fg_name, version=1)
+
+    for attempt in range(3):
+        try:
+            df = fg.read()
+            break
+        except Exception as e:
+            print(f"Read attempted: {attempt + 1},  failed because {str(e)}")
+            if attempt == 2:
+                raise
+            time.sleep(30)
+
+    df["time"] = pd.to_datetime(df["time"])
+    df = df.sort_values("time").set_index("time")
+    if df.index.tz is not None:
+        df.index = df.index.tz_localize(None)
+
+    return df
+
+
+# Step4: Getting data from feature group
+def get_data(project, fg_name, max_age_minutes=30):
+    recieved_time = time.time()
+
+    if fg_name in DATA_CACHE:
+        saved_data, saved_time = DATA_CACHE[fg_name]
+
+        again_request_time = (recieved_time - saved_time) / 60
+
+        if again_request_time < max_age_minutes:
+            return saved_data
+
+    df =  read_feature_group(project, fg_name)
+
+    DATA_CACHE[fg_name] = (df,recieved_time)
+
+    return df
+
+
+# Step5: Getting latest row
+def get_latest_row(df, time_col="time"):
+    if df.empty:
+        raise ValueError("Dataset is empty")
+
+    df = df.copy()
+
+    if time_col in df:
+        df[time_col] = pd.to_datetime(df[time_col])
+
+        if df[time_col].dt.tz is not None:        
+            df[time_col] = df[time_col].dt.tz_localize(None)
+
+        df = df.set_index(time_col)
+
+    df = df.sort_index()
+
+    return df.tail(1)
+    
+
+# Step6: Blend Prediction
+def predict_blend(models, X_test):
+    X_test_clean = models["scaler"].transform(X_test)
+
+    blend = (models["xgb"].predict(X_test)
+             + models["catboost"].predict(X_test)
+             + models["rf"].predict(X_test)
+             + models["ridge"].predict(X_test_clean)
+             + models["svm"].predict(X_test_clean)) / 5
+
+    return blend
+
+
+# Step7: AQI category
+def aqi_category(value):
+    if value <= 50:
+        category, colour = "Good", "green"
+        message = "Air quality is good."
+
+    elif value <= 100:
+        category, colour = "Moderate", "yellow"
+        message = "Air quality is acceptable."
+
+    elif value <= 150:
+        category, colour = "Unhealthy for Sensitive Groups", "orange"
+        message = "Sensitive groups may experience health effects."
+
+    elif value <= 200:
+        category, colour = "Unhealthy", "red"
+        message = "Everyone may feel effects. Limit time outdoors."
+
+    elif value <= 300:
+        category, colour = "Very Unhealthy", "purple"
+        message = "Health alert: everyone may experience more serious health effects."
+
+    else:
+        category, colour = "Hazardous", "maroon"
+        message = "Health emergency: everyone is likely to be affected."
+
+    return {
+        "category": category,
+        "colour": colour,
+        "alert": value > 150,
+        "message": message,
+    }
+
+    
