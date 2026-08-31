@@ -1,9 +1,11 @@
 fastapi
 uvicorn
+python-multipart
 hopsworks[python]
-xgboost
-catboost
+xgboost==3.4.0
+catboost==1.2.10
 scikit-learn==1.7.2
+numpy==2.3.5
+pandas==2.3.3
 joblib
-pandas
 python-dotenv
