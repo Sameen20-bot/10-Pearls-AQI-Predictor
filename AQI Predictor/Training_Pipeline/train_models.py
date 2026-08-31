@@ -5,6 +5,8 @@ from train_functions import (connect_hopsworks, read_feature_group,
                              baseline_R2_Score,
                              register_day1_model, register_day2_day3_model)
 
+import time
+
 
 print("Step1: Connecting to Hopsworks")
 project = connect_hopsworks()
@@ -39,6 +41,7 @@ print("Step7: Saving Day1 Model")
 register_day1_model(project, model1, metrics,  X_train1.columns)
 print("Step7: Done Yuppy ;)")
 
+time.sleep(15)  
 
 
 print("------------------DAY TWO--------------------")
@@ -70,7 +73,7 @@ print("Step7: Saving Day2 Model")
 register_day2_day3_model(project, model2, metrics2,  X_train2.columns, 2)
 print("Step7: Done Yuppy ;)")
 
-
+time.sleep(15)  
 
 print("------------------DAY THREE--------------------")
 
@@ -102,3 +105,4 @@ register_day2_day3_model(project, model3, metrics3,  X_train3.columns, 3)
 print("Step7: Done Yuppy ;)")
 
 print("\nTraining Pipeline Completed")
+

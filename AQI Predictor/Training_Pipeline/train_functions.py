@@ -15,6 +15,7 @@ from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
+import time
 
 DROP_DAY2 = ["boundary_layer_height", "f48_boundary_layer_height",
              "wind_pollution_dispersion", "delta_boundary_layer_height"]
@@ -49,7 +50,16 @@ def connect_hopsworks():
 def read_feature_group(project, fg_name):
     fs = project.get_feature_store()
     fg = fs.get_feature_group(name=fg_name, version=1)
-    df = fg.read()
+
+    for attempt in range(3):
+        try:
+            df = fg.read()
+            break
+        except Exception as e:
+            print(f"Read attempted: {attempt + 1},  failed because {str(e)}")
+            if attempt == 2:
+                raise
+            time.sleep(30)
 
     df["time"] = pd.to_datetime(df["time"])
     df = df.sort_values("time").set_index("time")
