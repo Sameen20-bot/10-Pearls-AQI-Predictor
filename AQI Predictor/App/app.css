@@ -1,0 +1,21 @@
+[data-testid="stAppViewContainer"]{
+    background-image: url("https://png.pngtree.com/thumb_back/fh260/background/20201009/pngtree-large-clouds-floating-in-the-blue-sky-sunset-in-windy-weather-image_403177.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+[data-testid="stHeader"]{
+    background: transparent;
+}
+
+#karachi-aqi-predictor{
+    color:#0B1E3D;
+}
+
+.small-circle {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-block;
+}
