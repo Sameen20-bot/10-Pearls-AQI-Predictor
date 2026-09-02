@@ -9,13 +9,227 @@
     background: transparent;
 }
 
+[data-testid="stIFrame"],
+[data-testid="stCustomComponentV1"]{
+    background: transparent !important;
+}
+
+/* Menu Styling */
+.container-xxl.d-flex.flex-column.flex-shrink-0.p-h.nav-justified{
+    background: transparent !important;
+}
+
+.current-box h1,
+.current-box h3,
+.current-box h4{
+    margin: 0;
+    padding: 0;
+}
+
 #karachi-aqi-predictor{
     color:#0B1E3D;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.current-box{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 2px solid #0B1E3D;
+    padding: 10px;
+    box-shadow: 6px 6px 5px black;
+    height: 50vh;
+}
+
+#head-current{
+    font-size: 80px !important;
+    line-height: 1 !important;
+    font-weight: 700;
+    color: #0B1E3D;
+    margin-bottom: 12px;
+}
+
+#category-current{
+    font-size: 26px;
+    font-weight: 600;
+    color: #0B1E3D;
+}
+
+ #aqi-message-current{
+    font-size: 26px;
+    font-weight: 600;
+    color: #0B1E3D;
+}
+
+.holder-aqi{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }
 
 .small-circle {
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  display: inline-block;
+  display: flex;
+  flex-direction: row;
+}
+
+
+/* Day Boxes Styling */
+
+.current-box-day{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 2px solid #0B1E3D;
+    padding: 10px;
+    box-shadow: 6px 6px 5px black;
+    height: 40vh;
+    width: 29vw !important;
+    gap: 10px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.day-heading{
+    font-size: 26px;
+    font-weight: 600;
+    color: #0B1E3D;
+}
+
+#day-head{
+    font-size: 46px;
+    font-weight: 600;
+    color: #0B1E3D;
+}
+
+#day-category{
+    font-size: 26px;
+    font-weight: 600;
+    color: #0B1E3D;
+}
+
+#day-aqi-message{
+    font-size: 26px;
+    font-weight: 600;
+    color: #0B1E3D;
+}
+
+/* Chart Trend */
+#trend-aqi-predictor{
+    color:#0B1E3D !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    text-align: center !important;
+    font-size: 46px;
+    font-weight: bold;
+}
+
+
+/* Dashboard Layout */
+
+/* aqi category style */
+
+.category-content{
+    background-color: #0D47A1;
+    border-radius: 16px;
+    box-shadow: 6px 6px 5px black;
+    padding: 30px;
+    width: 100% !important;
+    box-sizing: border-box;
+    margin-bottom: 30px;
+}
+
+.day-category{
+    color: white;
+    font-size: 18px
+}
+
+/* What to know style */
+
+.info-content{
+    background-color: #0D47A1;
+    border-radius: 16px;
+    box-shadow: 6px 6px 5px black;
+    padding: 30px;
+    width: 100% !important;
+    box-sizing: border-box
+}
+
+.holder-aqi-info{
+    display: flex;
+    flex-direction: column;
+}
+
+.head{
+    color: white;
+    font-size: 18px;
+    font-weight: 800;
+    margin-top: 10px;
+}
+
+.parag{
+    color: white;
+    font-size: 18px;
+}
+
+/* Expander Styling */
+[data-testid="stExpander"]{
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #0B1E3D;
+    border-radius: 16px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: 6px 6px 5px black;
+    padding: 20px;
+    font-size: 25px;
+    font-weight: 900;
+    color: #0D47A1;
+}
+
+[data-testid="stExpander"] summary p{
+    font-size: 25px !important;
+    font-weight: 900 !important;
+}
+
+[data-testid="stExpander"] summary svg{
+    height: 25px !important;
+    fill: #0B1E3D !important;
+    stroke: #0B1E3D !important;
+}
+
+
+/* Selector Styling */
+/* Label — "Select days for historical trend" */
+[data-testid="stSelectbox"] label{
+    color: #0B1E3D !important;
+    font-size: 46px;
+    font-weight: 600;
+    text-align: center !important;
+}
+
+/* Box khud */
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div{
+    background-color: rgba(255, 255, 255, 0.35);
+    border: 2px solid #0B1E3D;
+    border-radius: 10px;
+    color: #0B1E3D;
+}
+
+/* Selected value ka text */
+[data-testid="stSelectbox"] div[data-baseweb="select"] span{
+    color: #0B1E3D !important;
 }

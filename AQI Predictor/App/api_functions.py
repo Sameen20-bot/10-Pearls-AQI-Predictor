@@ -140,6 +140,8 @@ def get_latest_row(df, time_col="time"):
 
     df = df.sort_index()
 
+    df = df[df.index <= pd.Timestamp.now().normalize()]
+
     return df.tail(1)
     
 

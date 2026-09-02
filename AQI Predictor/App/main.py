@@ -19,7 +19,7 @@ day3_model, day3_features = load_blend_model(project, 3)
 
 # Home End Point
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def home():
     return{
         "message": "Karachi AQI Forecast API",
@@ -44,7 +44,7 @@ def health():
 
 # Predict End Point
 
-@app.get("/predict")
+@app.api_route("/predict", methods=["GET", "HEAD"])
 def predict():
     try:
         # Day 1
@@ -104,7 +104,7 @@ def predict():
 
 # Latest Temperature End Point
 
-@app.get("/latest-temperature")
+@app.api_route("/latest-temperature", methods=["GET", "HEAD"])
 def current_temperature():
     try:
         day1 = get_data(project, "aqi_daily_day1")
@@ -127,12 +127,13 @@ def current_temperature():
 
 # History End Point
 
-@app.get("/history")
+@app.api_route("/history", methods=["GET", "HEAD"])
 def history(days: int = 30, include_predictions: bool = False):
     if days < 1 or days > 365:
         raise HTTPException(status_code=400, detail="days must be between 1 and 365")
     try:
         df = get_data(project, "aqi_daily_day1")
+        df = df[df.index <= pd.Timestamp.now().normalize()]
         recent = df.tail(days)
 
         data = [
@@ -156,7 +157,7 @@ def history(days: int = 30, include_predictions: bool = False):
 
 # Predict File End Point
 
-@app.post('/predict-file')
+@app.api_route("/predict-file", methods=["POST", "HEAD"])
 async def predict_file(file: UploadFile=File(...)):
     if not file.filename.endswith('.csv'):
         raise HTTPException(
@@ -235,7 +236,7 @@ async def predict_file(file: UploadFile=File(...)):
 
 # Get Metrics
 
-@app.get("/metrics")
+@app.api_route("/metrics", methods=["GET", "HEAD"])
 def get_metrics():
     try:
         model_registry = project.get_model_registry()

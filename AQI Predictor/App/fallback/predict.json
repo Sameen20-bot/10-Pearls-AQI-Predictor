@@ -1,0 +1,45 @@
+{
+  "current_aqi_date": "2026-09-03",
+  "current_aqi": 62,
+  "current_aqi_status": {
+    "category": "Moderate",
+    "colour": "yellow",
+    "alert": false,
+    "message": "Air quality is acceptable."
+  },
+  "forecast": [
+    {
+      "day": 1,
+      "date": "2026-09-04",
+      "aqi": 63,
+      "aqi_status": {
+        "category": "Moderate",
+        "colour": "yellow",
+        "alert": false,
+        "message": "Air quality is acceptable."
+      }
+    },
+    {
+      "day": 2,
+      "date": "2026-09-05",
+      "aqi": 67,
+      "aqi_status": {
+        "category": "Moderate",
+        "colour": "yellow",
+        "alert": false,
+        "message": "Air quality is acceptable."
+      }
+    },
+    {
+      "day": 3,
+      "date": "2026-09-06",
+      "aqi": 69,
+      "aqi_status": {
+        "category": "Moderate",
+        "colour": "yellow",
+        "alert": false,
+        "message": "Air quality is acceptable."
+      }
+    }
+  ]
+}
