@@ -194,11 +194,17 @@ async def predict_file(file: UploadFile=File(...)):
     if df_file["time"].dt.tz is not None:        
         df_file["time"] = df_file["time"].dt.tz_localize(None)
 
-    df_file["time"] = df_file["time"].dt.normalize()
+    df_file["time"] = df_file["time"].dt.normalize()    
     df_file = df_file.set_index("time")
+
+    today = pd.Timestamp.now().normalize()
+
+    df_file = df_file[df_file.index < today]
 
     # Match with the feature store
     df = get_data(project, "aqi_daily_day1")
+
+    df = df[(df < today) & (df["day_1_future_aqi"].notna())]
 
     match = df[df.index.isin(df_file.index)]
 

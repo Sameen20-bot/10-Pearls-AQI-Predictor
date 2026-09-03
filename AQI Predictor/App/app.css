@@ -47,7 +47,7 @@
     height: 50vh;
 }
 
-#head-current{
+.head-current{
     font-size: 80px !important;
     line-height: 1 !important;
     font-weight: 700;
@@ -55,13 +55,13 @@
     margin-bottom: 12px;
 }
 
-#category-current{
+.category-current{
     font-size: 26px;
     font-weight: 600;
     color: #0B1E3D;
 }
 
- #aqi-message-current{
+.aqi-message-current{
     font-size: 26px;
     font-weight: 600;
     color: #0B1E3D;
@@ -110,19 +110,19 @@
     color: #0B1E3D;
 }
 
-#day-head{
+.day-head{
     font-size: 46px;
     font-weight: 600;
     color: #0B1E3D;
 }
 
-#day-category{
+.day-category{
     font-size: 26px;
     font-weight: 600;
     color: #0B1E3D;
 }
 
-#day-aqi-message{
+.day-aqi-message{
     font-size: 26px;
     font-weight: 600;
     color: #0B1E3D;
@@ -213,23 +213,69 @@
 
 
 /* Selector Styling */
-/* Label — "Select days for historical trend" */
-[data-testid="stSelectbox"] label{
+[data-testid="stMarkdownContainer"]{
+    width: 100% !important;
+}
+
+[data-testid="stMarkdownContainer"] p{
+    color: white !important;
+}
+
+[data-testid="stWidgetLabel"] [data-testid="stMarkdownContainer"] p{
     color: #0B1E3D !important;
-    font-size: 46px;
-    font-weight: 600;
+    font-size: 46px !important;
+    font-weight: 900 !important;
     text-align: center !important;
 }
 
-/* Box khud */
 [data-testid="stSelectbox"] div[data-baseweb="select"] > div{
     background-color: rgba(255, 255, 255, 0.35);
     border: 2px solid #0B1E3D;
     border-radius: 10px;
     color: #0B1E3D;
+    font-size: 18px !important;
 }
 
-/* Selected value ka text */
 [data-testid="stSelectbox"] div[data-baseweb="select"] span{
     color: #0B1E3D !important;
+    font-size: 18px !important;
+}
+
+/* Metrics Box Design */
+.metric-box-day{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #00BCFF;
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 6px 6px 5px black;
+    height: 20vh;
+    width: 13vw !important;
+    gap: 5px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.metric-head{
+    font-size: 19px;
+    font-weight: 600;
+    color: #0B1E3D;
+    text-align: center; 
+}
+
+.number-sub{
+    font-size: 23px;
+    font-weight: 900;
+    color: #0B1E3D;
+}
+
+#metric-evaluate{
+    color:#0B1E3D !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    text-align: center !important;
+    font-size: 46px;
+    font-weight: bold;
 }
