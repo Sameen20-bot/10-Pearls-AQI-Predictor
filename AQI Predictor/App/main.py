@@ -204,18 +204,16 @@ async def predict_file(file: UploadFile=File(...)):
     # Match with the feature store
     df = get_data(project, "aqi_daily_day1")
 
-    df = df[(df.index < today) & (df["day_1_future_aqi"].notna())]
-
-    match = df[df.index.isin(df_file.index)]
-
-    if len(match) == 0:
-        raise HTTPException(
-            status_code = 404,
-            detail = "Dates not found in the Feature Store"
-        )
-
-
     try:
+        df = df[(df.index < today) & (df["day_1_future_aqi"].notna())]
+        
+        match = df[df.index.isin(df_file.index)]
+        
+        if len(match) == 0:
+            raise HTTPException(
+                 status_code = 404,
+                 detail = "Dates not found in the Feature Store"
+            )
         predictions = day1_model.predict(match[day1_features])
 
         out = pd.DataFrame({
