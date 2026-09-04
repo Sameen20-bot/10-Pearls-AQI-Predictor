@@ -204,7 +204,7 @@ async def predict_file(file: UploadFile=File(...)):
     # Match with the feature store
     df = get_data(project, "aqi_daily_day1")
 
-    df = df[(df < today) & (df["day_1_future_aqi"].notna())]
+    df = df[(df.index < today) & (df["day_1_future_aqi"].notna())]
 
     match = df[df.index.isin(df_file.index)]
 
