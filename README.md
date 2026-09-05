@@ -260,13 +260,76 @@ Also recently I learned about the hourly cron does not actually fire every hour 
 
 ---
 
+## Serving: FastAPI and the dashboard
+ 
+I have splitted the serving side into two, like **FastAPI** service does all the working and send it to **Streamlit** dashboard to display.
+ 
+```mermaid
+flowchart LR
+    A[("Model Registry")] -->|loaded once at startup| B["FastAPI<br/>main.py"]
+    C[("Feature Store")] -->|cached for 30 min| B
+    B -->|JSON| D["Streamlit dashboard<br/>app.py"]
+    E["Saved JSON files"] -.->|only if the API is down| D
+    D --> F["User"]
+ 
+    style A fill:#fff4e6,stroke:#e8a33d
+    style C fill:#fff4e6,stroke:#e8a33d
+    style B fill:#eef6ff,stroke:#5b9bd5
+```
+ 
+---
+ 
+### The API
+ 
+The FastApi service loads the registered models and serves seven end points which is deployed on Render.
+ 
+| Endpoint             | What it returns                                                                  |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `/`                  | It displays the metadata information and available end points.                                           |
+| `/health`            | Check whether the models are working or not.                     |
+| `/predict`           | Returns current AQI and day one, two and three forecasts.     |
+| `/latest-temperature`| Returns the latest temperature.                                         |
+| `/history`           | Returns historical AQI for a requested days with predictions.        |
+| `/predict-file`      | Accepts a csv file, returns the predicted results (batch backtest).                |
+| `/metrics`           | Returns the models metrics for all three with the baseline gains.                          |
+ 
+
+### Getting it to run on Render
+ 
+The things broke and I figured out are:
+ 
+**Python version.** Render free version tier is set to Python 3.14 by default, for which Hopsworks packages were not compatible, so it causes errors in the Render logs. I did configuration in my Render environment and set Python to 3.11.9 version so no error occurs.
+ 
+**Free Tier Idle Causing Cold Starts.** Render free tier biggest issue is that its server can go to sleep after inactivity. After sending the first request must wait until it starts again and download the model files causing request timeouts. I used Uptime Robot that monitors and pings the server after every five minutes keeping the server warm and having no timeouts issues.
+ 
+---
+ 
+### The dashboard
+ 
+Four pages:
+ 
+| Page              | What is on it                                                                       |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| **Home**          | Displays current AQI along with temperature and horizon forecasts, alerts and trend chart. |
+| **Dashboard**     | AQI categorical information, historical trend chart, EDA visualizations.         |
+| **Model Insights**| Display metrics for each horizon and SHAP analysis. |
+| **Analyze**       | Here users can upload a csv of dates and receives the predicted values. (batch back testing).               |
+ 
+
+ 
+### When the API is asleep
+
+In case of a failed request every page has a fallback which loads the json file saved in a `fallback/` folder because red error trace on the screen is more worse than the old numbers.
+ 
+---
+
 ## Repository layout
 
 ```
 .github/workflows/
     data_pipeline.yml         hourly feature job
     train_pipeline.yml        daily training job
-
+ 
 AQI Predictor/
     Feature_Pipeline/
         functions.py          8 functions: fetch, clean, features, push
@@ -276,18 +339,28 @@ AQI Predictor/
         Feature_Store.ipynb          feature group setup and backfill
         Eda_Daily.ipynb              EDA on daily data
         Eda_Hourly.ipynb             EDA on hourly data
-
+ 
     Training_Pipeline/
         train_functions.py    11 functions: read, prep, train, score, gate, register
         train_models.py       runs all three horizons
-
+ 
     Models/
         XGBoost/              Day 1, 2, 3 - tuning, SHAP, registration
         CatBoost/             Day 1, 2, 3 comparison runs
         Facebook Prophet/     Day 1 attempt
         LSTM/                 Day 1 attempt
         Model Evaluation.xlsx hourly vs daily comparison
-
+ 
+    App/
+        main.py               FastAPI service, the 7 endpoints
+        api_functions.py      model loading, feature store reads, 30 min cache
+        app.py                Streamlit dashboard, the 4 pages
+        app.css               styling for the dashboard
+        fallback/             saved JSON for when the API is asleep
+        images/               EDA and SHAP plots the dashboard shows
+        animation/            Lottie animations used on the pages
+        requirements-app.txt  what Render installs for the API
+ 
     Registered_Models/        local copies of what is in the registry
     Data/                     raw and processed CSVs from the backfill
     requirements.txt          light, for the hourly job
@@ -333,4 +406,4 @@ Python 3.13. Package versions are pinned in both requirements files so CI matche
 
 ## Stack
 
-Python, pandas, NumPy, scikit-learn, XGBoost, CatBoost, SHAP, Prophet, Keras, Hopsworks, GitHub Actions, Open-Meteo.
+Python, pandas, NumPy, scikit-learn, XGBoost, CatBoost, Ridge Regression, Random Forest, SVR, SHAP, Prophet, Keras, LSTM, Fast API, Streamlit, Hopsworks, Uptime Robot, Render, GitHub Actions, Open-Meteo.
