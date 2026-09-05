@@ -301,6 +301,15 @@ def connect_hopsworks():
 
 # Step8: Current data pushes to Hopsworks
 def push_to_hopsworks(project, daily1, daily2, daily3):
+    """
+    Insert each daily dataset into its feature group, then verify that the
+    data actually landed.
+
+    insert(wait=False) returns as soon as the request is accepted, so it can
+    print "success" even when the materialization job later fails. That is
+    why every group is checked afterwards by reading it back and comparing
+    the latest date, instead of trusting the job status.
+    """
     fs = project.get_feature_store()
 
     DATASET_INSERT = {
@@ -309,19 +318,58 @@ def push_to_hopsworks(project, daily1, daily2, daily3):
         "aqi_daily_day3": daily3,
     }
 
+    failed = []
+
     for feature_name, data in DATASET_INSERT.items():
         fg = fs.get_feature_group(name=feature_name, version=1)
         to_insert = data.reset_index()
+        expected_latest = pd.to_datetime(to_insert["time"]).max()
 
+        inserted = False
         for attempt in range(3):
             try:
                 fg.insert(to_insert, wait=False)
-                print(f"{feature_name}: {len(to_insert)} rows inserted successfully")
+                inserted = True
                 break
             except Exception as e:
-                print(f"{feature_name}: Tried {attempt + 1} failed - {e}")
-                if attempt == 2:
-                    raise
+                print(f"{feature_name}: attempt {attempt + 1} failed - {e}")
                 time.sleep(20)
 
-    time.sleep(10)
+        # One bad group must not stop the other two from being pushed,
+        # so this continues instead of raising here.
+        if not inserted:
+            print(f"{feature_name}: INSERT FAILED after 3 attempts")
+            failed.append(feature_name)
+            continue
+
+        # The free tier runs one materialization job at a time, so give the
+        # job room to finish before the next group is pushed.
+        time.sleep(60)
+
+        # Verification: read the group back and check the newest date.
+        # This looks at the real data, so a false FAILED job status does not
+        # matter, and a silently lost insert cannot hide.
+        try:
+            check = fg.read()
+            actual_latest = pd.to_datetime(check["time"]).max()
+
+            if actual_latest.tz is not None:
+                actual_latest = actual_latest.tz_localize(None)
+
+            if actual_latest.normalize() < expected_latest.normalize():
+                print(f"{feature_name}: NOT LANDED - sent up to "
+                      f"{expected_latest.date()}, store only has {actual_latest.date()}")
+                failed.append(feature_name)
+            else:
+                print(f"{feature_name}: verified up to {actual_latest.date()} "
+                      f"({len(to_insert)} rows sent)")
+
+        except Exception as e:
+            print(f"{feature_name}: could not verify - {e}")
+
+    # Fail the workflow so a silent data gap shows up as a red run
+    # instead of a green one with stale data.
+    if failed:
+        raise RuntimeError(f"These feature groups did not update: {failed}")
+
+    print("All three feature groups updated and verified")
