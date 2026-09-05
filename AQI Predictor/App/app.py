@@ -15,7 +15,7 @@ from streamlit_option_menu import option_menu
 
 APP_DIR = Path(__file__).parent
 
-sl.set_page_config(page_title="AQI FORECAST KARACHI", page_icon="☀️", layout="wide")
+sl.set_page_config(page_title="AQI FORECAST KARACHI", page_icon="🍃", layout="wide", initial_sidebar_state="expanded")
 
 API_URL = "https://one0-pearls-aqi-predictor.onrender.com"
 
@@ -76,38 +76,56 @@ def predict_file(file_bytes, file_name):
     return response.content
 
 
-#Horizon Menu
-selected = option_menu(
-    menu_title = None,
-    menu_icon="cast",
-    default_index = 0,
-    options = ["Home", "Dashboard", "Model Insights", "Analyze"],
-    icons=["house", "bar-chart", "cpu", "upload"],
-    orientation="horizontal",
-     styles = {
-        "container": {
-            "background-color": "#007DCC",
-            "border-radius": "0px",
-            "padding": "6px",
-            "box-shadow": "6px 6px 5px black",
-        },
-        "nav-link": {
-            "color": "#0B1E3D",
-            "font-size": "20px",
-            "font-weight": "600",
-            "--hover-color": "rgba(255, 255, 255, 0.35)",
-            "border-radius": "0px",
-            "margin-start": "10px"
-        },
-        "nav-link-selected": {
-            "background-color": "#0B1E3D",
-            "color": "#FFFFFF",
-        },
-        "icon": {
-            "font-size": "20px",
-        },
-    }
-)
+#Menu
+with sl.sidebar:
+    sl.markdown("""
+        <div class="sidebar-brand">
+            <div>
+                <div class="sidebar-brand-icon">🍃</div>
+                <div class="sidebar-brand-title">KARACHI AQI</div>
+                <div class="sidebar-brand-subtitle">AIR QUALITY FORECAST</div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    selected = option_menu(
+        menu_title=None,
+        options=["Home", "Dashboard", "Model Insights", "Analyze"],
+        icons=["house", "bar-chart", "cpu", "upload"],
+        default_index=0,
+        orientation="vertical",
+        styles={ 
+            "container": {
+                "padding": "4px 0px",
+                "background-color": "#FFFFFF",
+                "color": "#0B1E3D",
+                "border-radius": "0px",
+                "box-shadow": "6px 6px 5px rgba(0,0,0,0.15) !important", 
+            },
+            "icon::before": {
+                "font-size": "18px",
+                "color": "#FFFFFF",
+            },
+            "icon::after": {
+                "font-size": "18px",
+                "color": "#0B1E3D",
+            },
+            "nav-link": {
+                "background-color": "transparent",
+                "color": "#0B1E3D",
+                "font-size": "16px",
+                "font-weight": "600",
+                "border-radius": "12px",
+                "margin": "5px 8px",
+                "white-space": "nowrap"
+            },
+            "nav-link-selected": {
+                "background-color": "#0B1E3D",
+                "color": "#FFFFFF",            
+            },
+        } 
+    ) 
+
 
 if selected == "Home":
 
@@ -812,7 +830,7 @@ if selected == "Analyze":
                     requests.get(f"{API_URL}/health", timeout=90)
 
                 with sl.spinner("Running predictions..."):
-                    csv_bytes = predict_file(file.getvalue(), file.name)
+                    csv_bytes =  predict_file(file.getvalue(), file.name)
 
                 sl.success("Predictions ready")
 
@@ -820,7 +838,7 @@ if selected == "Analyze":
 
                 sl.download_button(
                     label="Download Predictions CSV",
-                    data=csv_bytes,
+                    data= csv_bytes,
                     file_name="prediction.csv",
                     mime="text/csv",
                 )

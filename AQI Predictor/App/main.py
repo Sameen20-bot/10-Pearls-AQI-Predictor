@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 import pandas as pd, io
 from api_functions import (connect_hopsworks, day1_model_load,
                                load_blend_model, get_data, get_latest_row,
-                               predict_blend, aqi_category)
+                               predict_blend, aqi_category, today_karachi)
 
 app = FastAPI(title="Karachi AQI Forecast API")
 
@@ -67,35 +67,44 @@ def predict():
 
         # Today AQI
         current = float(row1["us_aqi"].iloc[0])
-        # For time
-        time_AQI = row1.index[0]
+
+
+        t1 = row1.index[0]
+        t2 = row2.index[0]
+        t3 = row3.index[0]
+
+        age = int((today_karachi() - t1).days)
 
         return {
-            "current_aqi_date": str(time_AQI.date()),
+            "current_aqi_date": str(t1.date()),
+            "data_age_days": age,
+            "is_stale": age > 1,
             "current_aqi": round(current),
             "current_aqi_status": aqi_category(current),
             "forecast": [
                 {
                     "day": 1,
-                    "date": str((time_AQI + timedelta(days=1)).date()),
+                    "date": str((t1 + timedelta(days=1)).date()),
                     "aqi": round(p1),
                     "aqi_status": aqi_category(p1),
                 },
                 {
                     "day": 2,
-                    "date": str((time_AQI + timedelta(days=2)).date()),
+                    "date": str((t2 + timedelta(days=2)).date()),
                     "aqi": round(p2),
                     "aqi_status": aqi_category(p2),
                 },
                 {
                     "day": 3,
-                    "date": str((time_AQI + timedelta(days=3)).date()),
+                    "date": str((t3 + timedelta(days=3)).date()),
                     "aqi": round(p3),
                     "aqi_status": aqi_category(p3),
                 },
             ],
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code = 500,
@@ -119,6 +128,8 @@ def current_temperature():
             "temperature": round(temp),
             "date": str(time_AQI.date())
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code = 500,
@@ -133,7 +144,7 @@ def history(days: int = 30, include_predictions: bool = False):
         raise HTTPException(status_code=400, detail="days must be between 1 and 365")
     try:
         df = get_data(project, "aqi_daily_day1")
-        df = df[df.index <= pd.Timestamp.now().normalize()]
+        df = df[df.index <= today_karachi()]
         recent = df.tail(days)
 
         data = [
@@ -152,6 +163,8 @@ def history(days: int = 30, include_predictions: bool = False):
                 row["actual_next_day_aqi"] = None if pd.isna(a) else round(float(a), 1)
 
         return {"days": days, "data": data}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"History failed: {e}")
 
@@ -197,9 +210,15 @@ async def predict_file(file: UploadFile=File(...)):
     df_file["time"] = df_file["time"].dt.normalize()    
     df_file = df_file.set_index("time")
 
-    today = pd.Timestamp.now().normalize()
+    today = today_karachi()
 
     df_file = df_file[df_file.index < today]
+
+    if len(df_file) == 0:
+        raise HTTPException(
+            status_code = 400,
+            detail = "All the dates are today or in the future. Upload past dates only."
+        )
 
     # Match with the feature store
     df = get_data(project, "aqi_daily_day1")
@@ -232,6 +251,9 @@ async def predict_file(file: UploadFile=File(...)):
             }
         )
 
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code = 500,
@@ -257,9 +279,10 @@ def get_metrics():
             "metrics_output": metrics_output
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code = 500,
             detail = f"Something went wrong {str(e)}"
         )
-        

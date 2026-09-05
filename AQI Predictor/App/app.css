@@ -14,10 +14,61 @@
     background: transparent !important;
 }
 
-/* Menu Styling */
-.container-xxl.d-flex.flex-column.flex-shrink-0.p-h.nav-justified{
-    background: transparent !important;
+
+/* SIDEBAR MENU */
+
+
+[data-testid="stSidebarContent"]{
+    background-color: white;
+    color: #0B1E3D !important;
+    box-shadow: 6px 6px 5px black !important;
+    width: 300px !important;
+    min-width: 300px !important;
 }
+
+.sidebar-brand-icon{
+    color: #0B1E3D !important;
+    font-size: 46px;
+    text-align: center;
+}
+
+.sidebar-brand-title{
+    color: #0B1E3D !important;
+    font-size: 36px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.sidebar-brand-subtitle{
+    color: #0B1E3D !important;
+    font-size: 26px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.menu{
+    color: white !important;
+}
+
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapseButton"] *,
+[data-testid="collapsedControl"],
+[data-testid="collapsedControl"] * {
+    color: #0B1E3D !important;
+    fill: #0B1E3D !important;
+    stroke: #0B1E3D !important;
+}
+
+[data-testid="stSidebar"][aria-expanded="false"] [data-testid="stSidebarContent"]{
+    width: 0px !important;
+    min-width: 0px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+
+/* Box style */
+
 
 .current-box h1,
 .current-box h3,
@@ -98,7 +149,7 @@
     padding: 10px;
     box-shadow: 6px 6px 5px black;
     height: 40vh;
-    width: 29vw !important;
+    width: 100% !important;
     gap: 10px;
     margin-top: 30px;
     margin-bottom: 20px;
@@ -252,7 +303,7 @@
     padding: 10px;
     box-shadow: 6px 6px 5px black;
     height: 20vh;
-    width: 13vw !important;
+    width: 100% !important;
     gap: 5px;
     margin-top: 30px;
     margin-bottom: 20px;
@@ -278,4 +329,136 @@
     text-align: center !important;
     font-size: 46px;
     font-weight: bold;
+}
+
+/* Responsiveness */
+
+@media (max-width: 1024px) {
+
+    [data-testid="stHorizontalBlock"]{
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+    }
+
+    [data-testid="stColumn"]{
+        flex: 1 1 28% !important;
+        min-width: 28% !important;
+    }
+
+    .current-box{
+        height: auto;
+        min-height: 260px;
+        box-sizing: border-box;
+    }
+
+    .current-box-day{
+        height: auto;
+        min-height: 210px;
+        box-sizing: border-box;
+    }
+
+    .metric-box-day{
+        height: auto;
+        min-height: 115px;
+        box-sizing: border-box;
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+
+    .metric-head,
+    .day-heading,
+    .category-current,
+    .aqi-message-current,
+    .day-aqi-message{
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .head-current{ font-size: 56px !important; }
+    .day-head{ font-size: 34px; }
+
+    .category-current,
+    .aqi-message-current,
+    .day-heading,
+    .day-category,
+    .day-aqi-message{ font-size: 19px; }
+
+    .metric-head{ font-size: 16px; }
+    .number-sub{ font-size: 22px; }
+
+    #trend-aqi-predictor,
+    #metric-evaluate{ font-size: 30px; }
+
+    [data-testid="stWidgetLabel"] [data-testid="stMarkdownContainer"] p{
+        font-size: 26px !important;
+    }
+}
+
+@media (max-width: 640px) {
+
+    [data-testid="stColumn"]{
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+    }
+
+    .current-box{
+        min-height: 200px;
+        padding: 14px;
+    }
+
+    .current-box-day{
+        min-height: 165px;
+        padding: 14px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .metric-box-day{
+        min-height: 95px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .head-current{ font-size: 44px !important; }
+    .day-head{ font-size: 30px; }
+
+    .category-current,
+    .aqi-message-current,
+    .day-heading,
+    .day-category,
+    .day-aqi-message{ font-size: 17px; }
+
+    .metric-head{ font-size: 16px; }
+    .number-sub{ font-size: 21px; }
+
+    #trend-aqi-predictor,
+    #metric-evaluate{ font-size: 22px; }
+
+    [data-testid="stWidgetLabel"] [data-testid="stMarkdownContainer"] p{
+        font-size: 19px !important;
+    }
+
+    .category-content,
+    .info-content{ padding: 16px; }
+
+    .head, .parag{ font-size: 15px; }
+
+    [data-testid="stExpander"]{ padding: 12px; }
+
+    [data-testid="stExpander"] summary p{
+        font-size: 17px !important;
+    }
+
+    [data-testid="stExpander"] summary svg{
+        height: 18px !important;
+    }
+
+    .current-box,
+    .current-box-day,
+    .metric-box-day,
+    .category-content,
+    .info-content,
+    [data-testid="stExpander"]{
+        box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.5);
+    }
 }

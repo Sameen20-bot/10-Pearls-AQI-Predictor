@@ -12,6 +12,14 @@ import datetime as dt
 
 DATA_CACHE = {}
 
+
+KARACHI_TZ = dt.timezone(dt.timedelta(hours=5))
+
+
+def today_karachi():
+    return pd.Timestamp(dt.datetime.now(KARACHI_TZ).date())
+
+
 #Step1: Hopsworks connection function
 def connect_hopsworks():
     CWD = Path.cwd()
@@ -101,6 +109,8 @@ def read_feature_group(project, fg_name):
     if df.index.tz is not None:
         df.index = df.index.tz_localize(None)
 
+    df.index = df.index.normalize()
+
     return df
 
 
@@ -140,7 +150,10 @@ def get_latest_row(df, time_col="time"):
 
     df = df.sort_index()
 
-    df = df[df.index <= pd.Timestamp.now().normalize()]
+    df = df[df.index <= today_karachi()]
+
+    if df.empty:
+        raise ValueError("No rows on or before today in the feature store")
 
     return df.tail(1)
     
@@ -190,5 +203,3 @@ def aqi_category(value):
         "alert": value > 150,
         "message": message,
     }
-
-    
