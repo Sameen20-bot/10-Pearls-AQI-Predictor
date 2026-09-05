@@ -299,17 +299,34 @@ def connect_hopsworks():
 
     return project
 
+def wait_for_job(fg, feature_name, max_wait_minutes=8):
+
+    BUSY = ("RUNNING", "SUBMITTED", "ACCEPTED", "NEW", "NEW_SAVING",
+            "INITIALIZING", "STARTING_APP_MASTER", "AGGREGATING_LOGS")
+
+    deadline = time.time() + max_wait_minutes * 60
+
+    while time.time() < deadline:
+        try:
+            state = str(fg.materialization_job.get_state()).upper()
+        except Exception as e:
+            # No job history yet, or the state call failed. Not worth
+            # blocking the pipeline over, so carry on.
+            print(f"{feature_name}: could not read job state - {e}")
+            return
+
+        if state not in BUSY:
+            return
+
+        print(f"{feature_name}: previous job is {state}, waiting 30s")
+        time.sleep(30)
+
+    print(f"{feature_name}: job still busy after {max_wait_minutes} min, continuing anyway")
+
+
 # Step8: Current data pushes to Hopsworks
 def push_to_hopsworks(project, daily1, daily2, daily3):
-    """
-    Insert each daily dataset into its feature group, then verify that the
-    data actually landed.
-
-    insert(wait=False) returns as soon as the request is accepted, so it can
-    print "success" even when the materialization job later fails. That is
-    why every group is checked afterwards by reading it back and comparing
-    the latest date, instead of trusting the job status.
-    """
+ 
     fs = project.get_feature_store()
 
     DATASET_INSERT = {
@@ -325,6 +342,8 @@ def push_to_hopsworks(project, daily1, daily2, daily3):
         to_insert = data.reset_index()
         expected_latest = pd.to_datetime(to_insert["time"]).max()
 
+        wait_for_job(fg, feature_name)
+
         inserted = False
         for attempt in range(3):
             try:
@@ -335,20 +354,16 @@ def push_to_hopsworks(project, daily1, daily2, daily3):
                 print(f"{feature_name}: attempt {attempt + 1} failed - {e}")
                 time.sleep(20)
 
-        # One bad group must not stop the other two from being pushed,
-        # so this continues instead of raising here.
         if not inserted:
             print(f"{feature_name}: INSERT FAILED after 3 attempts")
             failed.append(feature_name)
             continue
 
-        # The free tier runs one materialization job at a time, so give the
-        # job room to finish before the next group is pushed.
-        time.sleep(60)
+     
+        wait_for_job(fg, feature_name)
+        time.sleep(20)
 
-        # Verification: read the group back and check the newest date.
-        # This looks at the real data, so a false FAILED job status does not
-        # matter, and a silently lost insert cannot hide.
+   
         try:
             check = fg.read()
             actual_latest = pd.to_datetime(check["time"]).max()
@@ -367,8 +382,6 @@ def push_to_hopsworks(project, daily1, daily2, daily3):
         except Exception as e:
             print(f"{feature_name}: could not verify - {e}")
 
-    # Fail the workflow so a silent data gap shows up as a red run
-    # instead of a green one with stale data.
     if failed:
         raise RuntimeError(f"These feature groups did not update: {failed}")
 

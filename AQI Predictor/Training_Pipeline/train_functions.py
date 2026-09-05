@@ -64,13 +64,10 @@ def read_feature_group(project, fg_name):
     df["time"] = pd.to_datetime(df["time"])
     df = df.sort_values("time").set_index("time")
 
-    # tz_localize(None) raises TypeError if the index is already tz-naive,
-    # so it is only called when a timezone is actually present.
+   
     if df.index.tz is not None:
         df.index = df.index.tz_localize(None)
 
-    # Hopsworks stores the timestamps at 05:00:00 rather than midnight.
-    # Normalising keeps the training data lined up with the serving code.
     df.index = df.index.normalize()
 
     return df
@@ -244,12 +241,10 @@ def register_day1_model(project, model, metrics, feature_names):
         print("Model is not good do not register it")
         return False
 
-    # If it is passed model is good so, register it
     model_dir = Path("aqi_day1_xgb")
     model_dir.mkdir(exist_ok=True)
     model.save_model(str(model_dir / "xgb_aqi_day1.json"))
 
-    # Saving features of passed model
     with open(model_dir / "features.json", "w") as f:
         json.dump(list(feature_names), f)
 
