@@ -1,0 +1,32 @@
+# secrets
+.env
+*.env
+.cache.sqlite
+
+# python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# notebooks
+.ipynb_checkpoints/
+
+# training artefacts
+catboost_info/
+
+# editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# latex build output
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
