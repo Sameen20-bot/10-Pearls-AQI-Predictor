@@ -1,0 +1,7 @@
+streamlit
+streamlit-option-menu
+streamlit-lottie
+requests
+pandas
+numpy
+matplotlib

@@ -19,7 +19,7 @@ sl.set_page_config(page_title="AQI FORECAST KARACHI", page_icon="🍃", layout="
 
 API_URL = "https://one0-pearls-aqi-predictor.onrender.com"
 
-with open("app.css", encoding="utf-8") as csss:
+with open(APP_DIR / "app.css", encoding="utf-8") as csss:
     sl.markdown(f"<style>{csss.read()}</style>", unsafe_allow_html=True)
 
 fig, ax = plt.subplots(figsize=(24,10))
